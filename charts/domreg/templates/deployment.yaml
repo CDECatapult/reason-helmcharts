@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "domreg.fullname" . }}-app
+  labels:
+    {{- include "domreg.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.config.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "domreg.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+      {{- if .Values.config.commonAnnotations }}
+      {{- toYaml .Values.config.commonAnnotations | nindent 6 }}
+      {{- end }}
+      labels:
+        {{- include "domreg.labels" . | nindent 8 }}
+    spec:
+      {{- include "domreg.imagePullSecrets" . | indent 6 }}
+      initContainers:
+        - name: {{ include "domreg.fullname" . }}-db-init
+          image: {{ template "domreg.image" .Values.image }}
+          command: ['alembic', 'upgrade', 'head']
+          env:
+            - name: POSTGRES_HOST
+              value: {{ include "domreg.postgresql.fullname" . }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domreg.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domreg.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD
+      containers:
+        - name: {{ include "domreg.fullname" . }}-app
+          image: {{ template "domreg.image" .Values.image }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          ports:
+            - containerPort: {{ .Values.config.appPort }}
+          livenessProbe:
+            httpGet:
+              path: /api/drs/healthchecks/readiness
+              port: {{ .Values.config.appPort }}
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/drs/healthchecks/readiness
+              port: {{ .Values.config.appPort }}
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            - name: APP_DEBUG
+              value: {{ .Values.config.debug | quote }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: POSTGRES_HOST
+              value: {{ include "domreg.postgresql.fullname" . }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: PORTAL_HOST
+              value: {{ .Values.config.gui.host | quote }}
+            - name: PORTAL_PORT
+              value: {{ .Values.config.gui.port | quote }}
+            - name: USER_AUTH_SERVICE_HOST
+              value: {{ .Values.config.sma.host | quote }}
+            - name: USER_AUTH_SERVICE_PORT
+              value: {{ .Values.config.sma.port | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domreg.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domreg.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD

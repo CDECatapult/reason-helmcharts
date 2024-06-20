@@ -1,0 +1,83 @@
+## @section Domain Registration Service Parameters
+##
+config:
+## @param config.replicaCount The amount of containers to run
+  replicaCount: 1
+## @param config.type The type of service to create
+  type: LoadBalancer
+  ## @param config.appPort The port to expose the service and application on
+  appPort: 8000
+  ## @param config.nodePort The nodePort to use if the the service type is LoadBalancer or NodePort
+  nodePort: 30342
+  ## @param config.commonAnnotations The annotations to set on the Domain Registration Service application
+  commonAnnotations: {}
+  ## @param config.debug Whether or not to enable debug mode for the application
+  debug: "False"
+  ## @param config.logLevel The log level to use for the application
+  logLevel: DEBUG
+  gui:
+    ## @param config.gui.host The hostname of the GUI service
+    host: portal
+    ## @param config.gui.port The port of the GUI service
+    port: 8000
+  uas:
+    ## @param config.uas.host The hostname of the User Authentication service
+    host: userauthservice
+    ## @param config.uas.port The port of the User Authentication service
+    port: 8000
+
+
+## @section DeployManager Image Parameters
+image:
+  ## @param image.repository The repository to use for the Domain Registration Service image
+  repository: ghcr.io/cdecatapult/reason-domreg
+  ## @param image.pullPolicy The pull policy to use for the Domain Registration Service image
+  pullPolicy: Always
+  ## @param image.tag The tag to use for the Domain Registration Service image
+  tag: v0.1.6
+  ## @param image.pullSecrets The pull secrets to use for the Domain Registration Service image
+  pullSecrets: ['reason']
+
+## @section DeployManager Ingress parameters
+##
+ingress:
+  ## @param ingress.enabled Whether or not to enable the ingress for the Domain Registration Service application
+  enabled: true
+  ## @param ingress.annotations The annotations to set on the ingress for the Domain Registration Service application
+  annotations: {}
+  ## @param ingress.ingressClassName The ingress class to use for the Domain Registration Service application
+  ingressClassName: ""
+  ## @param ingress.hostname The hostname to use for the Domain Registration Service application
+  hostname: ""
+  ## @extra ingress.paths The paths to use for the Domain Registration Service application
+  paths:
+  ## @param ingress.paths[0].path The path to use for the Domain Registration Service application
+  ## @param ingress.paths[0].pathType The path type to use for the Domain Registration Service application
+    - path: /api/drs
+      pathType: Prefix
+
+## @section DeployManager ServiceAccount parameters
+serviceAccount:
+  ## @param serviceAccount.create Whether or not to create a service account for the Domain Registration Service service
+  create: false
+  ## @param serviceAccount.annotations The annotations to use for the Domain Registration Service service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use for the Domain Registration Service service
+  name: ""
+
+## @section DeployManager PostgreSQL parameters
+postgresql:
+  ## @param postgresql.enabled Whether or not to enable the PostgreSQL SubChart for the Domain Registration Service service
+  enabled: true
+  ## @param postgresql.primary.service.ports.postgresql The port to expose the PostgreSQL database service on
+  primary:
+    service:
+      ports:
+        postgresql: 5432
+  auth:
+    ## @param postgresql.auth.username The username to use for the PostgreSQL database
+    username: drsuser
+    ## @param postgresql.auth.password The password to use for the PostgreSQL database
+    password: drspassword
+    ## @param postgresql.auth.database The name of the database to use for the PostgreSQL database
+    database: domreg

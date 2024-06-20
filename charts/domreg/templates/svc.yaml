@@ -1,0 +1,18 @@
+{{- $fullName := include "domreg.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "domreg.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.config.type }}
+  ports:
+    - port: {{ .Values.config.appPort }}
+      targetPort: {{ .Values.config.appPort }}
+      {{- if or (eq .Values.config.type "NodePort") (eq .Values.config.type "LoadBalancer") }}
+      nodePort: {{ .Values.config.nodePort }}
+      {{- end }}
+      protocol: TCP
+      name: http
+  selector: {{- include "domreg.selectorLabels" . | nindent 4 }}
