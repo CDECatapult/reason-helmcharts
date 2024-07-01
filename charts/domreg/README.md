@@ -24,7 +24,7 @@
 | ------------------- | ----------------------------------------------------------------- | ----------------------------------- |
 | `image.repository`  | The repository to use for the Domain Registration Service image   | `ghcr.io/cdecatapult/reason-domreg` |
 | `image.pullPolicy`  | The pull policy to use for the Domain Registration Service image  | `Always`                            |
-| `image.tag`         | The tag to use for the Domain Registration Service image          | `0.1.7`                             |
+| `image.tag`         | The tag to use for the Domain Registration Service image          | `v0.1.7`                            |
 | `image.pullSecrets` | The pull secrets to use for the Domain Registration Service image | `["reason"]`                        |
 
 ### Domain Registration Service Ingress parameters
