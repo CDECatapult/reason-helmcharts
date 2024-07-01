@@ -77,9 +77,9 @@ spec:
             - name: PORTAL_PORT
               value: {{ .Values.config.gui.port | quote }}
             - name: USER_AUTH_SERVICE_HOST
-              value: {{ .Values.config.sma.host | quote }}
+              value: {{ .Values.config.uas.host | quote }}
             - name: USER_AUTH_SERVICE_PORT
-              value: {{ .Values.config.sma.port | quote }}
+              value: {{ .Values.config.uas.port | quote }}
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
