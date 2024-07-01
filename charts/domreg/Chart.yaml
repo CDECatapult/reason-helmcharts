@@ -1,8 +1,8 @@
 apiVersion: v2
 name: domreg
-appVersion: 0.1.5
+appVersion: 0.1.6
 description: A generated Helm Chart for REASON CDO Domain Registration Service
-version: 0.0.1
+version: 0.0.2
 type: application
 maintainers:
   - name: cdecatapult
