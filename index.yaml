@@ -1,0 +1,22 @@
+apiVersion: v1
+entries:
+  domreg:
+  - apiVersion: v2
+    appVersion: 0.1.7
+    created: "2024-07-01T13:48:33.414583505Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ^12.x.x
+    description: A generated Helm Chart for REASON CDO Domain Registration Service
+    digest: 26db2a5d76f72fe500e8ad75ae4dcf4330fb458b9e0185072162dc502265c477
+    maintainers:
+    - name: cdecatapult
+      url: cdecatapult.github.io/reason-helmcharts
+    name: domreg
+    type: application
+    urls:
+    - https://github.com/CDECatapult/reason-helmcharts/releases/download/domreg-0.0.2/domreg-0.0.2.tgz
+    version: 0.0.2
+generated: "2024-07-01T13:48:33.414594536Z"
