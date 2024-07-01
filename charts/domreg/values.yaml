@@ -34,7 +34,7 @@ image:
   ## @param image.pullPolicy The pull policy to use for the Domain Registration Service image
   pullPolicy: Always
   ## @param image.tag The tag to use for the Domain Registration Service image
-  tag: 0.1.6
+  tag: 0.1.7
   ## @param image.pullSecrets The pull secrets to use for the Domain Registration Service image
   pullSecrets: ['reason']
 
