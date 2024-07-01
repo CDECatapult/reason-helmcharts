@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-init-scripts
+data:
+  setup1.sql: |
+    CREATE DATABASE cdodb WITH OWNER reasoncdo;
