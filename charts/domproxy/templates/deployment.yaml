@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "domproxy.fullname" . }}-app
+  labels:
+    {{- include "domproxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.config.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "domproxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+      {{- if .Values.config.commonAnnotations }}
+      {{- toYaml .Values.config.commonAnnotations | nindent 6 }}
+      {{- end }}
+      labels:
+        {{- include "domproxy.labels" . | nindent 8 }}
+    spec:
+      {{- include "domproxy.imagePullSecrets" . | indent 6 }}
+      initContainers:
+        - name: {{ include "domproxy.fullname" . }}-db-init
+          image: {{ template "domproxy.image" .Values.image }}
+          command: ['alembic', 'upgrade', 'head']
+          env:
+            - name: POSTGRES_HOST
+              value: {{ include "domproxy.postgresql.fullname" . }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domproxy.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domproxy.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD
+      containers:
+        - name: {{ include "domproxy.fullname" . }}-app
+          image: {{ template "domproxy.image" .Values.image }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          ports:
+            - containerPort: {{ .Values.config.appPort }}
+          livenessProbe:
+            httpGet:
+              path: /api/dps/healthchecks/readiness
+              port: {{ .Values.config.appPort }}
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/dps/healthchecks/readiness
+              port: {{ .Values.config.appPort }}
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            - name: APP_DEBUG
+              value: {{ .Values.config.debug | quote }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: POSTGRES_HOST
+              value: {{ include "domproxy.postgresql.fullname" . }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: API_GATEWAY_IP_HOST
+              value: {{ .Values.config.api.host | quote }}
+            - name: API_GATEWAY_IP_PORT
+              value: {{ .Values.config.api.port | quote }}
+            - name: KEEP_ALIVE_IP_HOST
+              value: {{ .Values.config.kas.host | quote }}
+            - name: KEEP_ALIVE_IP_PORT
+              value: {{ .Values.config.kas.port | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domproxy.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "domproxy.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD
